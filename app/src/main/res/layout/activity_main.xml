@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_alignParentTop="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_placeholder"
+        android:contentDescription="Превью мема" />
+
+    <EditText
+        android:id="@+id/topText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageView"
+        android:layout_marginTop="16dp"
+        android:hint="Верхний текст" />
+
+    <EditText
+        android:id="@+id/bottomText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/topText"
+        android:layout_marginTop="8dp"
+        android:hint="Нижний текст" />
+
+    <Button
+        android:id="@+id/selectImageButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bottomText"
+        android:layout_marginTop="16dp"
+        android:text="Выбрать изображение" />
+
+    <Button
+        android:id="@+id/generateMemeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/selectImageButton"
+        android:layout_marginTop="8dp"
+        android:text="Создать мем" />
+
+    <Button
+        android:id="@+id/saveMemeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/generateMemeButton"
+        android:layout_marginTop="8dp"
+        android:text="Сохранить мем" />
+
+</RelativeLayout>
