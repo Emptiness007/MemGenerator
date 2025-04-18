@@ -59,21 +59,12 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton selectImageButton, generateMemeButton;
     private ProgressBar loadingProgressBar;
     private boolean isMenuOpen = false;
-    private static final String OPENROUTER_API_KEY = "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";
+    private static final String OPENROUTER_API_KEY = "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";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/";
     private static final String TAG = "MainActivity";
     private static final int MAX_RETRIES = 3;
     private int currentRetry = 0;
 
-    public interface OpenRouterApi {
-        @Headers({"HTTP-Referer: https://your-app-url.com", "X-Title: Your App Name"})
-        @POST("chat/completions")
-        Call<JsonObject> generateMeme(
-                @Header("Authorization") String authorization,
-                @Header("Content-Type") String contentType,
-                @Body RequestBody body
-        );
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         String jsonBody = "{"
-                + "\"model\": \"google/gemini-flash-1.5-8b-exp\","
+                + "\"model\": \"google/gemini-2.0-flash-exp:free\","
                 + "\"messages\": [{"
                 + "\"role\": \"user\","
                 + "\"content\": ["
