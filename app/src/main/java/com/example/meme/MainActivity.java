@@ -2,6 +2,7 @@ package com.example.meme;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -59,11 +60,13 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton selectImageButton, generateMemeButton;
     private ProgressBar loadingProgressBar;
     private boolean isMenuOpen = false;
-    private static final String OPENROUTER_API_KEY = "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";
+    private static final String OPENROUTER_API_KEY = "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";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/";
     private static final String TAG = "MainActivity";
     private static final int MAX_RETRIES = 3;
     private int currentRetry = 0;
+    private static final int MAX_IMAGE_DIMENSION = 1024;
+    private static final int JPEG_QUALITY = 70;
 
 
     @Override
@@ -88,6 +91,14 @@ public class MainActivity extends AppCompatActivity {
         fabSave.setOnClickListener(v -> saveMeme());
     }
 
+    public interface OpenRouterApi {
+        @POST("chat/completions")
+        Call<JsonObject> generateMeme(
+                @Header("Authorization") String authorization,
+                @Header("Content-Type") String contentType,
+                @Body RequestBody body
+        );
+    }
     private void setupGalleryLauncher() {
         galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -149,7 +160,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void generateMemeWithRetry() {
-        String base64Image = bitmapToBase64(selectedImage);
+        Bitmap resizedBitmap = resizeBitmap(selectedImage);
+        String base64Image = bitmapToBase64(resizedBitmap);
+
+        Log.d(TAG, "Base64 length: " + base64Image.length() + " characters");
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(OPENROUTER_API_URL)
@@ -157,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         String jsonBody = "{"
-                + "\"model\": \"google/gemini-2.0-flash-exp:free\","
+                + "\"model\": \"google/gemini-flash-1.5-8b-exp\","
                 + "\"messages\": [{"
                 + "\"role\": \"user\","
                 + "\"content\": ["
@@ -226,6 +240,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private Bitmap resizeBitmap(Bitmap original) {
+        int width = original.getWidth();
+        int height = original.getHeight();
+
+        float scale = Math.min((float) MAX_IMAGE_DIMENSION / width,
+                (float) MAX_IMAGE_DIMENSION / height);
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        return Bitmap.createBitmap(original, 0, 0, width, height, matrix, true);
+    }
+
     private void handleGenerationError(String errorMessage) {
         Log.e(TAG, errorMessage);
 
@@ -247,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         String jsonBody = "{"
-                + "\"model\": \"mistralai/mixtral-8x7b-instruct:free\","
+                + "\"model\": \"mistralai/mistral-nemo:free\","
                 + "\"messages\": [{"
                 + "\"role\": \"user\","
                 + "\"content\": \"Translate this to Russian (return only the translation without explanations, notes and punctuation): " + text.replace("\"", "\\\"") + "\""
@@ -257,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
 
         OpenRouterApi api = retrofit.create(OpenRouterApi.class);
-        Call<JsonObject> call = api.generateMeme("Bearer " + OPENROUTER_API_KEY, "application/json", requestBody);
+        Call<JsonObject> call = api.generateMeme("Bearer " + "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", "application/json", requestBody);
 
         call.enqueue(new retrofit2.Callback<JsonObject>() {
             @Override
@@ -310,10 +337,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String bitmapToBase64(Bitmap bitmap) {
+        Bitmap compressedBitmap = compressBitmap(bitmap);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        compressedBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, baos);
         byte[] byteArray = baos.toByteArray();
         return Base64.encodeToString(byteArray, Base64.NO_WRAP);
+    }
+
+    private Bitmap compressBitmap(Bitmap original) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        original.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out);
+        byte[] byteArray = out.toByteArray();
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
     }
 
     private void createMeme(String text) {
