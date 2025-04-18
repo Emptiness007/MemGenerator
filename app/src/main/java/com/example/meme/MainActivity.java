@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
                     // Настройки для основного текста
                     Paint textPaint = new Paint();
                     textPaint.setColor(Color.WHITE);
-                    textPaint.setTextSize(120); // Увеличиваем размер шрифта
+                    textPaint.setTextSize(100); // Увеличиваем размер шрифта
                     textPaint.setTextAlign(Paint.Align.CENTER);
                     textPaint.setAntiAlias(true);
 
