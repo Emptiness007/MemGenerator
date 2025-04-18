@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 + "\"messages\": [{"
                 + "\"role\": \"user\","
                 + "\"content\": ["
-                + "{\"type\": \"text\", \"text\": \"Generate a short and funny meme caption for this image (max 5-7 words). Return only the caption text without any additional formatting or explanations.\"},"
+                + "{\"type\": \"text\", \"text\": \"Generate a short and super funny meme caption for this image (max 5-7 words). Return only the caption text without any additional formatting or explanations.\"},"
                 + "{\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/jpeg;base64," + base64Image + "\"}}"
                 + "]"
                 + "}]"
@@ -377,7 +377,7 @@ public class MainActivity extends AppCompatActivity {
                     // Настройки для основного текста
                     Paint textPaint = new Paint();
                     textPaint.setColor(Color.WHITE);
-                    textPaint.setTextSize(100); // Увеличиваем размер шрифта
+                    textPaint.setTextSize(120); // Увеличиваем размер шрифта
                     textPaint.setTextAlign(Paint.Align.CENTER);
                     textPaint.setAntiAlias(true);
 
@@ -450,26 +450,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void shareMeme() {
-        if (generatedMeme == null) {
-            Toast.makeText(this, "Нет мема для", Toast.LENGTH_SHORT).show();
+        if (generatedMeme == null || generatedMeme.isRecycled()) {
+            Toast.makeText(this, "Нет мема для отправки", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "generatedMeme is null or recycled");
             return;
         }
 
         try {
+            // Сохраняем мем в файл
             File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "shared_meme.png");
             FileOutputStream fos = new FileOutputStream(file);
             generatedMeme.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
             fos.close();
+            Log.d(TAG, "Meme saved to: " + file.getAbsolutePath());
 
-            Uri uri = FileProvider.getUriForFile(this, "com.example.meme.fileprovider", file);
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("image/png");
-            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(shareIntent, "Поделиться мемом"));
+            // Проверяем, существует ли файл и его размер
+            if (file.exists() && file.length() > 0) {
+                Uri uri = FileProvider.getUriForFile(this, "com.example.meme.fileprovider", file);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("image/png");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(shareIntent, "Поделиться мемом"));
+            } else {
+                Toast.makeText(this, "Ошибка: файл мема пустой", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Meme file is empty or not created");
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ошибка при отправке", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error sharing meme: " + e.getMessage());
         }
     }
 
