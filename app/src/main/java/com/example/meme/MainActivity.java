@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButton selectImageButton, generateMemeButton;
     private ProgressBar loadingProgressBar;
     private boolean isMenuOpen = false;
-    private static final String OPENROUTER_API_KEY = "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";
+    private static final String OPENROUTER_API_KEY = "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";
     private static final String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/";
     private static final String TAG = "MainActivity";
     private static final int MAX_RETRIES = 3;
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         String jsonBody = "{"
-                + "\"model\": \"google/gemini-flash-1.5-8b-exp\","
+                + "\"model\": \"google/gemini-2.0-flash-exp:free\","
                 + "\"messages\": [{"
                 + "\"role\": \"user\","
                 + "\"content\": ["
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), jsonBody);
 
         OpenRouterApi api = retrofit.create(OpenRouterApi.class);
-        Call<JsonObject> call = api.generateMeme("Bearer " + "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", "application/json", requestBody);
+        Call<JsonObject> call = api.generateMeme("Bearer " + OPENROUTER_API_KEY, "application/json", requestBody);
 
         call.enqueue(new retrofit2.Callback<JsonObject>() {
             @Override
